@@ -9,6 +9,16 @@ function [x y pos trials map mapping] = getBehavEvents(pos,bins)
 
 % David Tingley, 2017 
 
+
+
+
+% EXPLANATION OF THE OPTITRACK .POS FIELDS:
+% https://github.com/buzsakilab/buzcode/blob/master/preprocessing/positionTracking/optitrack/bz_processConvertOptitrack2Behav.m
+
+
+
+
+
 if pos(1,1) == 0 & size(pos,2) < 6
     %% old code for LED tracking
     pos = [pos(:,2:5),pos(:,1)];    
@@ -58,6 +68,9 @@ if size(pos,2)>6
 %        pos(:,y_coord) = pos(:,y_coord)./1000; 
 %     end
     x_coord = 8;
+    
+    z_coord = 9;
+    
     y_coord = 10;
     p = pos(:,[x_coord y_coord]);
     if nanstd(pos(:,x_coord)) > 100
@@ -98,6 +111,8 @@ end
 dbstop if error
  
 
+disp('READY TO ENTER: 1')
+
 
 disp('pick start/stop locations')
 [x,y] = ginput();
@@ -126,6 +141,10 @@ lastStop = 0;
 lastStart = 0;
 clf();
 cc=1;
+
+
+disp('READY TO ENTER: 2')
+
 
 for l=1:length(locsmat)
     next=1;
@@ -220,6 +239,9 @@ for l=1:length(locsmat)
 end
 
 
+disp('READY TO ENTER: 3')
+
+
 trials = reshape(trials,length(x)*length(x)*2,1); 
 c=1;
 for i=1:length(trials)
@@ -229,8 +251,14 @@ for i=1:length(trials)
         c=1+c;
     end
 end
+
+
+disp('READY TO ENTER: 4')
+
+
 %% merge trials to the same length
 for i=1:length(trials_unsorted)
+    disp(num2str(i))
        d = pdist(trials_unsorted{i}(:,[x_coord y_coord]),'euclidean');
        dd = squareform(d);
        dd(dd==0)=nan;
@@ -253,6 +281,11 @@ for i=1:length(trials_unsorted)
        end
    end
 end
+
+
+disp('READY TO ENTER: 5')
+
+
 %% TODO, add automatic removal of trials that are too short
 % cluster similarity
 for i=1:length(trials_unsorted)
@@ -263,6 +296,11 @@ for i=1:length(trials_unsorted)
         cc(i,j)=temp(2);
     end
 end
+
+
+disp('READY TO ENTER: 6')
+
+
 
 %% get number of trial types / behavioral condition manually...
 numConditions = str2num(input('How many conditions were there: ','s'));
@@ -320,6 +358,12 @@ while exitC == 0
     end
 end
 % check that clustering was correct 
+
+save('right_before_7.mat')
+
+disp('READY TO ENTER: 7')
+
+
 
 %% normalize positions to template
 c=1;
@@ -407,7 +451,7 @@ for tt = 1:length(trials)
         for p = 1:length(trials{tt}{t})
             [a b] = min(nansum(abs([trials{tt}{t}(p,1)-map{tt}(:,1),...
                 trials{tt}{t}(p,x_coord)-map{tt}(:,x_coord),...
-                trials{tt}{t}(p,9)-map{tt}(:,9),...
+                trials{tt}{t}(p,z_coord)-map{tt}(:,z_coord),...
                 trials{tt}{t}(p,y_coord)-map{tt}(:,y_coord),...
                 (trials{tt}{t}(p,1)-trials{tt}{t}(1,1))*50-map{tt}(:,1),...  % penalty for time differences
                 40*(p./length(trials{tt}{t})*length(map{tt}) - (1:length(map{tt})))'])'));     % penalty for order differences
@@ -422,6 +466,9 @@ for tt = 1:length(trials)
         end
     end
 end
+
+disp('READY TO ENTER: 8')
+
 
 %% incorporate this below to reformat things and double check trial assignments...
 % load behav
@@ -443,6 +490,10 @@ dbmap=m;
 mapping=mm;
 trials= tt;
 
+disp('READY TO ENTER: 9')
+
+
+
 for tt = 1:length(trials)
 subplot(5,4,tt)
 for t = 1:length(trials{tt})
@@ -452,6 +503,10 @@ hold on
 
 %     axis([0 550 0 550])
 end
+
+disp('READY TO ENTER: 10')
+
+figure
 for t = 1:length(trials{tt})
 %     scatter(map{tt}(:,1),map{tt}(:,2),'.')
 scatter(trials{tt}{t}(1,x_coord),trials{tt}{t}(1,y_coord),'.g')
